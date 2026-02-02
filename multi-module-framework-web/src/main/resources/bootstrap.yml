@@ -18,7 +18,7 @@ spring:
         namespace: 21d70db6-e607-4da9-82f6-18cf22bf4f86 # 替换为Nacos中dev命名空间的实际ID（一串字符，不是名称）
         # ========== 修复2：Nacos鉴权配置（直接写死本地账号密码，无EL，确保鉴权通过） ==========
         username: nacos # 本地Nacos账号，默认nacos
-        password: Srcloud@213 # 替换为你修改后的Nacos密码（如123456）
+        password:  # 替换为你修改后的Nacos密码（如123456）
   # 解决Spring Boot3.x外部配置源导入校验，无需改
 
 # 暂时注释掉EL映射（先保证能拉取配置，后续稳定后再优化）

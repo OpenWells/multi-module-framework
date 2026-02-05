@@ -1,34 +1,38 @@
-# Spring Boot3.2.8 最终可用版（修复EL语法+Nacos鉴权+Dev环境）
+# Nacos核心配置（bootstrap.yml，优先加载）
 spring:
   application:
-    name: multi-module-framework # 必须和Nacos的DataId完全一致，不可改
+    name:  multi-module-framework # 服务名（Nacos注册的服务名称，必填）
   profiles:
-    active: dev # 激活开发环境，无需改
+    active: dev # 环境标识（dev/test/prod，对应Nacos的配置文件后缀）
   cloud:
     nacos:
-      config:
-        server-addr: localhost:8848 # 本地Nacos地址，无需改
-        file-extension: yml # 配置格式，和Nacos一致
-        group: DEFAULT_GROUP # 必须和Nacos的配置分组一致
-        prefix: ${spring.application.name} # 配置前缀，和服务名一致
-        refresh-enabled: true # 动态刷新，无需改
-        import-check:
-          enabled: false # 禁用导入校验，避免启动报错
-        # ========== 修复1：直接硬编码Dev命名空间ID（测试阶段最稳妥，避免EL解析错误） ==========
-        namespace: 21d70db6-e607-4da9-82f6-18cf22bf4f86 # 替换为Nacos中dev命名空间的实际ID（一串字符，不是名称）
-        # ========== 修复2：Nacos鉴权配置（直接写死本地账号密码，无EL，确保鉴权通过） ==========
+      # 1. Nacos服务注册发现配置
+      discovery:
+        server-addr: 127.0.0.1:8848 # Nacos服务端地址（本地，生产改集群地址）
+        namespace: public # Nacos命名空间（无自定义则用public）
+        group: DEFAULT_GROUP # 配置分组
+        service: ${spring.application.name}
         username: nacos # 本地Nacos账号，默认nacos
-        password:  # 替换为你修改后的Nacos密码（如123456）
-  # 解决Spring Boot3.x外部配置源导入校验，无需改
+        password: Srcloud@213 # 替换为你修改后的Nacos密码（如123456）
+      # 2. Nacos配置中心配置
+      config:
+        server-addr: ${spring.cloud.nacos.discovery.server-addr} # 与注册地址一致
+        namespace: 21d70db6-e607-4da9-82f6-18cf22bf4f86
+        group: ${spring.cloud.nacos.discovery.group}
+        file-extension: yml # 配置文件格式（yml/properties）
+        prefix: ${spring.application.name} # 配置文件前缀（默认服务名）
+        username: nacos # 本地Nacos账号，默认nacos
+        password: Srcloud@213 # 替换为你修改后的Nacos密码（如123456）
 
-# 暂时注释掉EL映射（先保证能拉取配置，后续稳定后再优化）
-# dev:
-#   nacos:
-#     namespace: 你的Dev命名空间ID
-#     username: nacos
-#     password: 你的本地Nacos新密码
-# prod:
-#   nacos:
-#     namespace: 你的Prod命名空间ID
-#     username: nacos
-#     password: 你的线上Nacos密码
+
+# 暴露Actuator端点（Nacos健康检查/配置刷新）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' # 暴露所有端点
+  endpoint:
+    health:
+      show-details: always # 显示健康检查详情
+    refresh:
+      enabled: true # 启用配置刷新

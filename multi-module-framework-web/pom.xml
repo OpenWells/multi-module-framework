@@ -24,37 +24,47 @@
             <artifactId>multi-module-framework-api</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <!-- 依赖common模块 -->
         <dependency>
             <groupId>org.liu</groupId>
             <artifactId>multi-module-framework-common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
-
         </dependency>
-        <!-- Spring Boot Web（3.x，适配JDK17） -->
+        <!-- Spring Web核心（接口接入） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>3.2.8</version>
         </dependency>
-        <!-- Spring Boot Test（测试） -->
+        <!-- Nacos服务注册发现（核心，web模块注册服务） -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <!-- Nacos配置中心 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        <!-- 健康检查（Nacos监控） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <version>3.2.8</version>
-            <scope>test</scope>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
     </dependencies>
 
-    <!-- Spring Boot打包插件（可执行JAR） -->
+    <!-- 启动类构建配置 -->
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

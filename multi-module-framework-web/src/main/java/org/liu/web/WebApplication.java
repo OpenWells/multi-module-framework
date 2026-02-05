@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
  * @ComponentScan：扫描所有模块的Bean
  */
 @SpringBootApplication
-@ComponentScan(basePackages = "org.liu") // 关键：扫描所有模块
+@ComponentScan(basePackages = "org.liu")
 public class WebApplication {
     public static void main(String[] args) {
         SpringApplication.run(WebApplication.class, args);

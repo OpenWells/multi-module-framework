@@ -12,10 +12,17 @@
     <description>业务实现模块</description>
 
     <dependencies>
+
         <!-- 依赖core模块（实现接口） -->
         <dependency>
             <groupId>org.liu</groupId>
             <artifactId>multi-module-framework-core</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <!-- 依赖契约模块 -->
+        <dependency>
+            <groupId>org.liu</groupId>
+            <artifactId>multi-module-framework-api</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <!-- common（实现接口） -->
@@ -24,30 +31,15 @@
             <artifactId>multi-module-framework-common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <!-- Spring Boot Core -->
+        <!-- Nacos配置中心 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <version>3.2.8</version>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
-        <!-- Lombok -->
+        <!-- 事务管理（核心） -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-        </dependency>
-        <!-- 新增MyBatis-Plus依赖 -->
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.5</version>
-        </dependency>
-        <!-- MySQL驱动 -->
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.33</version>
-            <scope>runtime</scope>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
         </dependency>
 
     </dependencies>

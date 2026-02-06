@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public Result<?> handleBusinessException(BusinessException e) {
         log.error("业务异常：", e);
-        return Result.error(e.getCode(), e.getMessage());
+        return Result.fail( e.getMessage());
     }
 
     /**
@@ -27,6 +27,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<?> handleException(Exception e) {
         log.error("系统异常：", e);
-        return Result.error("系统繁忙，请稍后重试");
+        return Result.fail("系统繁忙，请稍后重试");
     }
 }

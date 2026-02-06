@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.liu.core.mapper.seckill.SeckillStockMapper">
+    <!-- 乐观锁扣减库存 -->
+    <update id="deductStockByVersion">
+        UPDATE seckill_stock
+        SET surplus_stock = surplus_stock - 1,
+            version = version + 1,
+            update_time = NOW()
+        WHERE activity_id = #{activityId}
+          AND surplus_stock > 0
+          AND version = #{version}
+    </update>
+</mapper>

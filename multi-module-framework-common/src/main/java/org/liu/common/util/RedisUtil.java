@@ -5,101 +5,59 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Redis工具类（适配JDK17，封装常用操作）
+ * 通用Redis工具（无业务感知，封装基础操作，原有框架类，复用）
  */
 @Component
 public class RedisUtil {
-
     @Resource
-    private RedisTemplate<String, Serializable> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
-    // ==================== 普通操作 ====================
-    /**
-     * 设置缓存（带过期时间）
-     */
-    public <T extends Serializable> void set(String key, T value, long timeout, TimeUnit unit) {
+    // 设置缓存（带过期时间）
+    public void set(String key, Object value, long timeout, TimeUnit unit) {
         redisTemplate.opsForValue().set(key, value, timeout, unit);
     }
 
-    /**
-     * 设置缓存（永久）
-     */
-    public <T extends Serializable> void set(String key, T value) {
+    // 设置缓存（无过期时间）
+    public void set(String key, Object value) {
         redisTemplate.opsForValue().set(key, value);
     }
 
-    /**
-     * 获取缓存
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends Serializable> T get(String key) {
-        return (T) redisTemplate.opsForValue().get(key);
+    // 获取缓存
+    public Object get(String key) {
+        return redisTemplate.opsForValue().get(key);
     }
 
-    /**
-     * 删除缓存
-     */
-    public Boolean delete(String key) {
+    // 删除缓存
+    public Boolean del(String key) {
         return redisTemplate.delete(key);
     }
 
-    /**
-     * 判断缓存是否存在
-     */
+    // 判断缓存是否存在
     public Boolean exists(String key) {
         return redisTemplate.hasKey(key);
     }
 
-    /**
-     * 设置过期时间
-     */
-    public Boolean expire(String key, long timeout, TimeUnit unit) {
-        return redisTemplate.expire(key, timeout, unit);
+    // 执行Lua脚本
+    public <T> T executeLua(DefaultRedisScript<T> script, List<String> keys, Object... args) {
+        return redisTemplate.execute(script, keys, args);
     }
 
-    // ==================== 分布式锁 ====================
-    /**
-     * 获取分布式锁（JDK17 Lambda简化脚本）
-     */
-    public boolean tryLock(String lockKey, String requestId, long expireTime) {
-        String script = """
-                if redis.call('setNx', KEYS[1], ARGV[1]) then
-                    if redis.call('expire', KEYS[1], ARGV[2]) then
-                        return 1
-                    else
-                        return 0
-                    end
-                else
-                    return 0
-                end
-                """; // JDK17文本块语法
-        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
-        redisScript.setScriptText(script);
-        redisScript.setResultType(Long.class);
-        Long result = redisTemplate.execute(redisScript, Collections.singletonList(lockKey), requestId, expireTime);
-        return result != null && result == 1;
+    // 数值自减
+    public Long decr(String key) {
+        return redisTemplate.opsForValue().decrement(key);
     }
 
-    /**
-     * 释放分布式锁
-     */
-    public boolean releaseLock(String lockKey, String requestId) {
-        String script = """
-                if redis.call('get', KEYS[1]) == ARGV[1] then
-                    return redis.call('del', KEYS[1])
-                else
-                    return 0
-                end
-                """;
-        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
-        redisScript.setScriptText(script);
-        redisScript.setResultType(Long.class);
-        Long result = redisTemplate.execute(redisScript, Collections.singletonList(lockKey), requestId);
-        return result != null && result == 1;
+    // 集合添加元素
+    public Long sAdd(String key, Object... values) {
+        return redisTemplate.opsForSet().add(key, values);
+    }
+
+    // 集合判断元素是否存在
+    public Boolean sIsMember(String key, Object value) {
+        return redisTemplate.opsForSet().isMember(key, value);
     }
 }

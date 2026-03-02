@@ -43,10 +43,11 @@ public class SeckillLuaUtil {
      * @return 0=库存不足，1=秒杀成功，2=用户已下单
      */
     public Integer executeSeckillLua(String stockKey, String userOrderKey, Long userId) {
-        DefaultRedisScript<Integer> script = new DefaultRedisScript<>();
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
         script.setScriptText(SECKILL_LUA_SCRIPT);
-        script.setResultType(Integer.class);
+        script.setResultType(Long.class);
         // 执行Lua脚本（原子操作）
-        return redisUtil.executeLua(script, Collections.singletonList(stockKey), userOrderKey, userId);
+        Long result = redisUtil.executeLua(script, Collections.singletonList(stockKey), userOrderKey, userId);
+        return result != null ? result.intValue() : -1;
     }
 }

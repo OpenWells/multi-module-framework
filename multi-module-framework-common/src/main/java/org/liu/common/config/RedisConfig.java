@@ -19,8 +19,8 @@ public class RedisConfig {
      * 自定义RedisTemplate（序列化优化）
      */
     @Bean
-    public RedisTemplate<String, Serializable> redisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<String, Serializable> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(factory);
 
         // Key序列化（JDK17 String序列化）

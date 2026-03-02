@@ -1,14 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 对应Mapper接口全类名 -->
 <mapper namespace="org.liu.core.mapper.seckill.SeckillStockMapper">
-    <!-- 乐观锁扣减库存 -->
-    <update id="deductStockByVersion">
+
+    <!-- 通用结果集映射（复用字段） -->
+    <resultMap id="BaseResultMap" type="org.liu.core.entity.seckill.SeckillStock">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="activity_id" property="activityId" jdbcType="BIGINT"/>
+        <result column="stock_num" property="stockNum" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 通用查询列 -->
+    <sql id="Base_Column_List">
+        id, activity_id, stock_num, create_time, update_time
+    </sql>
+
+    <!-- 根据活动ID查询库存（核心：缓存预热/兜底校验） -->
+    <select id="selectByActivityId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM seckill_stock
+        WHERE activity_id = #{activityId,jdbcType=BIGINT}
+    </select>
+
+    <!-- 乐观锁扣减库存（核心：秒杀成功后异步更新） -->
+    <update id="decrStockByActivityId" parameterType="java.lang.Long">
         UPDATE seckill_stock
-        SET surplus_stock = surplus_stock - 1,
-            version = version + 1,
-            update_time = NOW()
-        WHERE activity_id = #{activityId}
-          AND surplus_stock > 0
-          AND version = #{version}
+        SET stock_num = stock_num - 1,
+        update_time = NOW()  <!-- MySQL 5.7兼容：用NOW()替代CURRENT_TIMESTAMP -->
+        WHERE activity_id = #{activityId,jdbcType=BIGINT}
+        AND stock_num > 0  <!-- 乐观锁核心：仅库存>0时扣减，避免超卖 -->
     </update>
+
+    <!-- 新增库存（初始化活动库存） -->
+    <insert id="insert" parameterType="org.liu.core.entity.seckill.SeckillStock">
+        INSERT INTO seckill_stock (activity_id, stock_num, create_time, update_time)
+        VALUES (#{activityId,jdbcType=BIGINT}, #{stockNum,jdbcType=INTEGER}, NOW(), NOW())
+    </insert>
+
+    <!-- 选择性更新库存（对账后同步） -->
+    <update id="updateByPrimaryKeySelective" parameterType="org.liu.core.entity.seckill.SeckillStock">
+        UPDATE seckill_stock
+        <set>
+            <if test="activityId != null">
+                activity_id = #{activityId,jdbcType=BIGINT},
+            </if>
+            <if test="stockNum != null">
+                stock_num = #{stockNum,jdbcType=INTEGER},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 根据ID查询库存（通用方法） -->
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM seckill_stock
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
 </mapper>
